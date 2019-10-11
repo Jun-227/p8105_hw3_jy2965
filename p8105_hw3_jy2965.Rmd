@@ -2,7 +2,7 @@
 title: "p8105_hw3_jy2965"
 author: "Jun Yin"
 date: "10/11/2019"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
