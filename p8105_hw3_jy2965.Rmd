@@ -103,8 +103,10 @@ instacart %>%
   group_by(aisle) %>% 
   filter(n_items == max(n_items)) %>% 
   knitr::kable()
-
 ```
+
+
+
 The most popular item in aisle "baking ingredients" is "Light Brown Sugar", the most popular item in aisle "dog food care" is "Snack Sticks Chicken & Rice Recipe Dog Treats", and the most popular item in aisle "packaged vegetables fruits" is "Organic Baby Spinach".
 
 *Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).*
@@ -119,9 +121,112 @@ instacart %>%
   knitr::kable()
 
 ```
+
+
+
+
 People tends to buy Coffee Ice Cream around 1pm to 3pm, but on Friday people may buy the cream a little bit earlier, around 12:00 at noon. And people usually buy Pink Lady Apples around noon from 11am to 2pm.
 
 ## problem 2
+
+
+*format the data to use appropriate variable names*
+*focus on the “Overall Health” topic*
+*include only responses from “Excellent” to “Poor”*
+*organize responses as a factor taking levels ordered from “Poor” to “Excellent”*
+```{r}
+data("brfss_smart2010")
+brfss = janitor::clean_names(brfss_smart2010) %>% 
+rename(state = locationabbr, county = locationdesc) %>% 
+filter(topic == "Overall Health") %>% 
+filter(response %in% c("Excellent", "Very good","Good", "Fair", "Poor")) %>% 
+  mutate(response = factor(response, levels = c("Poor", "Fair","Good", "Very good", "Excellent")))
+  
+```
+
+
+*Using this dataset, do or answer the following (commenting on the results of each):*
+
+*In 2002, which states were observed at 7 or more locations? What about in 2010?*
+```{r}
+#year in 2002
+brfss %>% 
+  filter(year == "2002") %>% 
+  group_by(state) %>% 
+  summarise(n_location = n_distinct(county)) %>% 
+  filter(n_location >= 7) %>% 
+  knitr::kable()
+#year in 2010
+brfss %>% 
+  filter(year == "2010") %>% 
+  group_by(state) %>% 
+  summarise(n_location = n_distinct(county)) %>% 
+  filter(n_location >= 7) %>% 
+  knitr::kable()
+```
+
+
+
+In 2002, there are 6 states being observed at 7 or more location. Here is the list of 6 states: CT, FL, MA, NC, NJ,PA; As for 2010, there are 14 states being observed at 7 or more location.
+
+
+
+
+*Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help).*
+
+
+```{r}
+brfss %>% 
+  filter(response %in% "Excellent") %>% 
+  group_by(year,state) %>% 
+  summarise(avg_datavalue = mean(data_value)) %>% 
+  select(year, state, avg_datavalue) %>% 
+ggplot(aes(x = year, y = avg_datavalue, color = state)) +
+  geom_line() +
+  labs(
+        title = "Spaghetti-Plot average value over time within a state",
+        y = "average value",
+        x = "Year",
+        caption = "Data from p8105.datasets package") +
+  theme(legend.position = "bottom",
+        legend.key.width = unit(.25, 'cm')) +
+  guides(color = guide_legend(ncol = 15))
+  
+```
+
+
+
+The figure above shows the average value over time within a state. We can see the concussion in each state.
+
+
+*Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.*
+
+```{r}
+brfss %>% 
+  filter(year %in% c("2006", "2010", state == "NY")) %>%
+  group_by(year,county,response) %>% 
+  summarise(avg_datavalue = mean(data_value)) %>% 
+  ggplot(aes(x = response, y = avg_datavalue)) +
+  geom_boxplot()+
+  facet_grid(.~year) +
+  labs(
+        title = "distribution of data_value for responses",
+        y = "Average data_value",
+        x = "response",
+        caption = "Data from p8105.datasets package") +
+  theme(legend.position = "bottom")
+```
+
+
+
+Form the figure above, we could see the same trend of mean of data_value between 2006 and 2010. In response is poor group, the data value has lowest mean. The highest mean of data value appers in "very good" response group.
+
+
+##problem 3
+
+
+
+
 
 
 
