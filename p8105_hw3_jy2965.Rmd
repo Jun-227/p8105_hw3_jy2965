@@ -225,9 +225,64 @@ Form the figure above, we could see the same trend of mean of data_value between
 ##problem 3
 
 
+*Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset*
+
+```{r}
+acceler = read_csv(file = "./accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(week_vs_weekend = day %in% c("Saturday","Sunday"), week_vs_weekend = as.numeric(week_vs_weekend)) %>% 
+  select(week, day_id, day, week_vs_weekend, everything())
+
+skimr::skim(acceler)
+```
+
+
+There are 35 rows and 1444 columns in this dataset.
+week: unique week ID
+day: which day in the week
+week_vs_weekend: 0 represents weekday, 1 represents weekend.
+day_id: unique day ID
+activity.*: the activity counts for each minute of a 24-hour day starting at midnight
+
+*Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?*
+
+```{r}
+acceler %>% 
+  group_by(week,day) %>% 
+  pivot_longer(
+    activity_1:activity_1440,
+    names_to = "minutes", 
+    values_to = "activity") %>% 
+  group_by(week,day) %>% 
+  summarise(total_activity = sum(activity)) %>% 
+ mutate(day = factor(day, levels = c("Monday", "Tuesday","Wednesday", "Thursday", "Friday","Saturday","Sunday"))) %>% 
+  arrange(week,day) %>% 
+ knitr::kable()
+
+```
 
 
 
+I didn't see any apparent trend through each day in 5 weeks.
 
+
+*Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.*
+
+```{r}
+acceler %>% 
+  group_by(week,day) %>% 
+  pivot_longer(
+    activity_1:activity_1440,
+    names_to = "minutes", 
+    values_to = "activity") %>% 
+  group_by(week,day) %>% 
+  summarise(total_activity = sum(activity)) %>% 
+ mutate(day = factor(day, levels = c("Monday", "Tuesday","Wednesday", "Thursday", "Friday","Saturday","Sunday"))) %>% 
+  arrange(week,day) %>% 
+  ggplot(aes(x = day, y = total_activity))+
+  geom_point(aes(color = week))
+
+
+```
 
 
