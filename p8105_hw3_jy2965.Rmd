@@ -7,6 +7,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(readr)
 library(tidyverse)
 library(patchwork)
 library(hexbin)
@@ -60,7 +61,7 @@ There are 134 distinct aisles, and "fresh vegetables" aisle is the most items or
 
 *Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.*
 ```{r}
-#whole list of aisles
+#whole list of aisles(it not required but I prefer to keep this plot to compare with ">10000" plot)
   instacart %>% 
   group_by(aisle) %>% 
   summarize(n_aisle = n()) %>% 
@@ -89,6 +90,8 @@ There are 134 distinct aisles, and "fresh vegetables" aisle is the most items or
     x = "Aisle",
     y = "Number of Items",
     caption = "Data from p8105.datasets package") 
+  
+
 ```
 
 Form the figure above, we know that the number of items in "fresh vegetables" and "fresh fruits" are much higher then any other asiles
@@ -103,6 +106,8 @@ instacart %>%
   group_by(aisle) %>% 
   filter(n_items == max(n_items)) %>% 
   knitr::kable()
+
+
 ```
 
 
@@ -163,6 +168,8 @@ brfss %>%
   summarise(n_location = n_distinct(county)) %>% 
   filter(n_location >= 7) %>% 
   knitr::kable()
+
+
 ```
 
 
@@ -192,6 +199,7 @@ ggplot(aes(x = year, y = avg_datavalue, color = state)) +
         legend.key.width = unit(.25, 'cm')) +
   guides(color = guide_legend(ncol = 15))
   
+
 ```
 
 
@@ -202,19 +210,21 @@ The figure above shows the average value over time within a state. We can see th
 *Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.*
 
 ```{r}
-brfss %>% 
-  filter(year %in% c("2006", "2010", state == "NY")) %>%
+brfss_plot = brfss %>% 
+  filter(year %in% c("2006", "2010"), state == "NY") %>%
   group_by(year,county,response) %>% 
-  summarise(avg_datavalue = mean(data_value)) %>% 
-  ggplot(aes(x = response, y = avg_datavalue)) +
-  geom_boxplot()+
+  select(year,county,response,data_value)
+  ggplot(brfss_plot,aes(fill= response, y=data_value, x=county)) +
+  geom_bar(position = "fill",stat = "identity")+
   facet_grid(.~year) +
+  coord_flip() +
   labs(
         title = "distribution of data_value for responses",
         y = "Average data_value",
         x = "response",
         caption = "Data from p8105.datasets package") +
   theme(legend.position = "bottom")
+
 ```
 
 
@@ -228,9 +238,9 @@ Form the figure above, we could see the same trend of mean of data_value between
 *Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset*
 
 ```{r}
-acceler = read_csv(file = "./accel_data.csv") %>% 
+acceler = read_csv(file = "./data/accel_data.csv") %>% 
   janitor::clean_names() %>% 
-  mutate(week_vs_weekend = day %in% c("Saturday","Sunday"), week_vs_weekend = as.numeric(week_vs_weekend)) %>% 
+  mutate(week_vs_weekend = ifelse(day %in% c("Saturday","Sunday"),"weekend","weekday")) %>% 
   select(week, day_id, day, week_vs_weekend, everything())
 
 skimr::skim(acceler)
