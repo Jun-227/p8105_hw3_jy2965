@@ -267,6 +267,10 @@ acceler %>%
   summarise(total_activity = sum(activity)) %>% 
  mutate(day = factor(day, levels = c("Monday", "Tuesday","Wednesday", "Thursday", "Friday","Saturday","Sunday"))) %>% 
   arrange(week,day) %>% 
+  pivot_wider(
+    names_from = day,
+    values_from = total_activity
+  ) %>% 
  knitr::kable()
 
 ```
@@ -279,20 +283,22 @@ I didn't see any apparent trend through each day in 5 weeks.
 *Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.*
 
 ```{r}
-acceler %>% 
+acceler_plot=acceler %>% 
   group_by(week,day) %>% 
   pivot_longer(
     activity_1:activity_1440,
     names_to = "minutes", 
-    values_to = "activity") %>% 
-  group_by(week,day) %>% 
-  summarise(total_activity = sum(activity)) %>% 
- mutate(day = factor(day, levels = c("Monday", "Tuesday","Wednesday", "Thursday", "Friday","Saturday","Sunday"))) %>% 
-  arrange(week,day) %>% 
-  ggplot(aes(x = day, y = total_activity))+
-  geom_point(aes(color = week))
+    values_to = "activity")  
+ggplot(acceler_plot, aes(x = minutes, y = activity,group = day_id,color = day))+
+  geom_line()+
+  labs(
+    title = "24-hour activity time courses for each day and use color to indicate day of the week",
+    x = "Minutes",
+    y = "Activity"
+  )
 
 
 ```
 
 
+Here is the 24-hour activity time courses for each day and use color to indicate day of the week.
