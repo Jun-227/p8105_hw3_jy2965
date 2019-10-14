@@ -241,6 +241,7 @@ Form the figure above, we could see the same trend of mean of data_value between
 acceler = read_csv(file = "./data/accel_data.csv") %>% 
   janitor::clean_names() %>% 
   mutate(week_vs_weekend = ifelse(day %in% c("Saturday","Sunday"),"weekend","weekday")) %>% 
+   mutate(day = factor(day, levels = c("Monday", "Tuesday","Wednesday", "Thursday", "Friday","Saturday","Sunday"))) %>% 
   select(week, day_id, day, week_vs_weekend, everything())
 
 skimr::skim(acceler)
@@ -250,7 +251,7 @@ skimr::skim(acceler)
 There are 35 rows and 1444 columns in this dataset.
 week: unique week ID
 day: which day in the week
-week_vs_weekend: 0 represents weekday, 1 represents weekend.
+week_vs_weekend: indicate if the day is in weekday or weekend.
 day_id: unique day ID
 activity.*: the activity counts for each minute of a 24-hour day starting at midnight
 
@@ -265,7 +266,6 @@ acceler %>%
     values_to = "activity") %>% 
   group_by(week,day) %>% 
   summarise(total_activity = sum(activity)) %>% 
- mutate(day = factor(day, levels = c("Monday", "Tuesday","Wednesday", "Thursday", "Friday","Saturday","Sunday"))) %>% 
   arrange(week,day) %>% 
   pivot_wider(
     names_from = day,
@@ -288,7 +288,8 @@ acceler_plot=acceler %>%
   pivot_longer(
     activity_1:activity_1440,
     names_to = "minutes", 
-    values_to = "activity")  
+    values_to = "activity")
+
 ggplot(acceler_plot, aes(x = minutes, y = activity,group = day_id,color = day))+
   geom_line()+
   labs(
@@ -301,4 +302,5 @@ ggplot(acceler_plot, aes(x = minutes, y = activity,group = day_id,color = day))+
 ```
 
 
-Here is the 24-hour activity time courses for each day and use color to indicate day of the week.
+Here is the 24-hour activity time courses for each day and use color to indicate day of the week. From this graph, we can see the activity in Wednesday is apparently lower than the other days. 
+
